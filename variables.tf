@@ -71,7 +71,7 @@ variable "log_analytics_workspace_id" {
 }
 
 variable "workload_profiles" {
-  description = "A list of workload profiles for the Container App Environment. Changing this forces a new resource to be created."
+  description = "A list of workload profiles for the Container App Environment. `workload_profile_type` must be one of 'Consumption', 'D4', 'D8', 'D16', 'D32', 'E4', 'E8', 'E16', or 'E32'. If the type is 'Consumption', the name must also be 'Consumption'. Only one Consumption workload profile is allowed per environment. The default value (an empty list) will result in an environment that is Consumption-only. Changing this forces a new resource to be created."
   type = list(object({
     name                  = string
     workload_profile_type = string
@@ -83,7 +83,7 @@ variable "workload_profiles" {
 
   validation {
     condition     = alltrue([for profile in var.workload_profiles : contains(["Consumption", "D4", "D8", "D16", "D32", "E4", "E8", "E16", "E32"], profile.workload_profile_type)])
-    error_message = "Workload profile type must be one of 'Consumption', 'D4', 'D8', 'D16', 'D32', 'E4', 'E8', 'E16', 'E32'."
+    error_message = "Workload profile type must be one of 'Consumption', 'D4', 'D8', 'D16', 'D32', 'E4', 'E8', 'E16', or 'E32'."
   }
 
   validation {
