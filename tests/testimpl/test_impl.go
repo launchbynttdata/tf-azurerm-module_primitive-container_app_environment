@@ -45,3 +45,7 @@ func TestComposableComplete(t *testing.T, ctx types.TestContext) {
 		assert.Equal(t, *environment.Properties.AppLogsConfiguration.Destination, "log-analytics")
 	})
 }
+
+func TestComposableReadonlyComplete(t *testing.T, ctx types.TestContext) {
+	TestComposableComplete(t, ctx)
+}
