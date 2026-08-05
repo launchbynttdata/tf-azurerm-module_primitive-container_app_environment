@@ -7,54 +7,64 @@
 
 A Container App Environment. This is a building block for use with Container Apps and Container App Jobs.
 
-## Local Development and Testing
+## Usage
 
-To set yourself up for local development and testing activities, ensure you have the following software available on your PATH:
+See [examples/minimal](examples/minimal) for a deployable example.
 
-- make
-- git (ensure your user.name and user.email are configured)
-- [git-repo](https://gerrit.googlesource.com/git-repo#install)
-- [`asdf`](https://asdf-vm.com) or [`mise`](https://mise.jdx.dev/)
-- python3 (for pre-commit hooks)
+## Module Development
 
-You will also need to authenticate to the Cloud Provider. Terraform will use the default credential resolution mechanism, so ensure you are signed on through the CLI.
+### Pre-Requisites
 
-Clone this repository to your machine and issue the following command:
+The following commands should be available on your system:
 
-```
-make configure
-```
+- `asdf` or `mise`
+- `make`
+- `python3` (for pre-commit)
 
-This will synchronize supporting repositories into this directory and expose additional targets.
+Additionally, your `git` user and email must be configured. Run `make configure` from the repository root to confirm that these requirements are met.
 
-To perform linting actions against the Terraform module and Terratests, issue the following command:
+### Pre-Commit hooks
 
-```
+The [.pre-commit-config.yaml](.pre-commit-config.yaml) file defines hooks for Terraform formatting, validation, documentation generation, and secret detection. Hooks are installed by `make configure`. Go linting runs through `make lint` locally and in CI.
+
+### Terratest examples
+
+Tests in `tests/post_deploy_functional/` and `tests/post_deploy_functional_readonly/` explicitly target `examples/minimal`. The functional suite applies and destroys the example; the readonly suite uses the non-destructive runner against existing infrastructure.
+
+### Local Validation
+
+Before pushing changes:
+
+1. Run `make configure` successfully.
+2. Sign in to Azure and select the appropriate subscription.
+3. Run the linters:
+
+```shell
 make lint
 ```
 
-To provision cloud resources and perform tests against them, issue the following command:
+4. When Azure credentials are available, run the integration tests (apply, test, and destroy):
 
-```
+```shell
 make test
 ```
 
-Note that `make test` causes the creation of some ignored files on your filesystem. This behavior is expected and we want to exclude any state or lockfiles from being pushed to the repository.
+Pre-commit validation, linting, and tests also run in CI.
 
-These two commands will be utilized in the pipeline and if you cannot run them successfully locally, you are unlikely to see a different result in the pipeline.
+### Review & Merge Process
 
-For convenience, a target exists that will execute both `make lint` and `make test` for you in sequence. Issue the following command to perform a holistic lint and test:
+Open a pull request to `main`. The PR title must follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#specification) format to merge and drive semantic versioning. Ensure CI passes, address review feedback, and obtain the approvals required by `CODEOWNERS`.
 
-```
-make check
-```
+### Automatic Updates
+
+Shared configuration and workflows are managed through [launch-terraform-skeleton](https://github.com/launchbynttdata/launch-terraform-skeleton). Avoid one-off edits to generated skeleton files unless necessary. Use `copier check-update` and `copier update` when refreshing from the skeleton.
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.0 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.3 |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | ~> 3.117 |
 
 ## Modules
