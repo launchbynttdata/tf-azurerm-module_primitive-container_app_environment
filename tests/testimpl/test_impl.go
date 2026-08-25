@@ -29,8 +29,8 @@ func TestComposableComplete(t *testing.T, ctx types.TestContext) {
 		t.Fatalf("failed to create environments client: %v", err)
 	}
 
-	resourceGroupName := terraform.Output(t, ctx.TerratestTerraformOptions(), "resource_group_name")
-	environmentName := terraform.Output(t, ctx.TerratestTerraformOptions(), "container_app_environment_name")
+	resourceGroupName := terraform.OutputContext(t, context.Background(), ctx.TerratestTerraformOptions(), "resource_group_name")
+	environmentName := terraform.OutputContext(t, context.Background(), ctx.TerratestTerraformOptions(), "container_app_environment_name")
 
 	environment, err := environmentsClient.Get(context.TODO(), resourceGroupName, environmentName, nil)
 	if err != nil {
