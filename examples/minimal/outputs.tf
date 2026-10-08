@@ -11,25 +11,31 @@
 // limitations under the License.
 
 output "resource_group_id" {
-  value = module.resource_group.id
+  description = "The ID of the example resource group."
+  value       = module.resource_group.id
 }
 
 output "resource_group_name" {
-  value = module.resource_group.name
+  description = "The name of the example resource group."
+  value       = module.resource_group.name
 }
 
 output "log_analytics_workspace_id" {
-  value = module.log_analytics_workspace.id
+  description = "The ID of the Log Analytics workspace used by the Container App Environment."
+  value       = module.log_analytics_workspace.id
 }
 
 output "log_analytics_workspace_name" {
-  value = module.log_analytics_workspace.name
+  description = "The name of the Log Analytics workspace used by the Container App Environment."
+  value       = module.log_analytics_workspace.name
 }
 
 output "container_app_environment_id" {
-  value = module.container_app_environment.id
+  description = "The ID of the Container App Environment."
+  value       = module.container_app_environment.id
 }
 
 output "container_app_environment_name" {
-  value = module.container_app_environment.name
+  description = "The name of the Container App Environment."
+  value       = module.container_app_environment.name
 }

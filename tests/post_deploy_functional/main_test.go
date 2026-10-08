@@ -21,11 +21,12 @@ import (
 )
 
 const (
-	testConfigsExamplesFolderDefault = "../../examples"
+	// Functional tests explicitly target the minimal example.
+	testConfigsExamplesFolderDefault = "../../examples/minimal"
 	infraTFVarFileNameDefault        = "test.tfvars"
 )
 
-func TestPrimitiveModule(t *testing.T) {
+func TestContainerAppEnvironmentModule(t *testing.T) {
 
 	ctx := types.CreateTestContextBuilder().
 		SetTestConfig(&testimpl.ThisTFModuleConfig{}).

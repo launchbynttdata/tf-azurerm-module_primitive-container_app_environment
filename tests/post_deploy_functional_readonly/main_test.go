@@ -21,11 +21,12 @@ import (
 )
 
 const (
-	testConfigsExamplesFolderDefault = "../../examples"
+	// Readonly tests explicitly target the same deployed minimal example.
+	testConfigsExamplesFolderDefault = "../../examples/minimal"
 	infraTFVarFileNameDefault        = "test.tfvars"
 )
 
-func TestResourceGroupModule(t *testing.T) {
+func TestReadonlyContainerAppEnvironmentModule(t *testing.T) {
 
 	ctx := types.CreateTestContextBuilder().
 		SetTestConfig(&testimpl.ThisTFModuleConfig{}).
@@ -33,5 +34,5 @@ func TestResourceGroupModule(t *testing.T) {
 		SetTestConfigFileName(infraTFVarFileNameDefault).
 		Build()
 
-	lib.RunSetupTestTeardown(t, *ctx, testimpl.TestComposableComplete)
+	lib.RunNonDestructiveTest(t, *ctx, testimpl.TestComposableReadonlyComplete)
 }
