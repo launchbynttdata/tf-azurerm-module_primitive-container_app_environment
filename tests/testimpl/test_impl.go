@@ -10,6 +10,7 @@ import (
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/launchbynttdata/lcaf-component-terratest/types"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestComposableComplete(t *testing.T, ctx types.TestContext) {
@@ -31,6 +32,7 @@ func TestComposableComplete(t *testing.T, ctx types.TestContext) {
 
 	resourceGroupName := terraform.OutputContext(t, context.Background(), ctx.TerratestTerraformOptions(), "resource_group_name")
 	environmentName := terraform.OutputContext(t, context.Background(), ctx.TerratestTerraformOptions(), "container_app_environment_name")
+	infrastructureResourceGroupName := terraform.OutputContext(t, context.Background(), ctx.TerratestTerraformOptions(), "infrastructure_resource_group_name")
 
 	environment, err := environmentsClient.Get(context.TODO(), resourceGroupName, environmentName, nil)
 	if err != nil {
@@ -43,6 +45,19 @@ func TestComposableComplete(t *testing.T, ctx types.TestContext) {
 
 	t.Run("EnsureEnvironmentIsBoundToLogAnalyticsWorkspace", func(t *testing.T) {
 		assert.Equal(t, *environment.Properties.AppLogsConfiguration.Destination, "log-analytics")
+	})
+
+	t.Run("EnsureConsumptionWorkloadProfile", func(t *testing.T) {
+		require.NotNil(t, environment.Properties)
+		require.Len(t, environment.Properties.WorkloadProfiles, 1)
+		profile := environment.Properties.WorkloadProfiles[0]
+		require.NotNil(t, profile)
+		require.NotNil(t, profile.Name)
+		require.NotNil(t, profile.WorkloadProfileType)
+		assert.Equal(t, "Consumption", *profile.Name)
+		assert.Equal(t, "Consumption", *profile.WorkloadProfileType)
+		require.NotNil(t, environment.Properties.InfrastructureResourceGroup)
+		assert.Equal(t, infrastructureResourceGroupName, *environment.Properties.InfrastructureResourceGroup)
 	})
 }
 

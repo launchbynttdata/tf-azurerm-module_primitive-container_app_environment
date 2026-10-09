@@ -36,7 +36,7 @@ variable "dapr_application_insights_connection_string" {
 }
 
 variable "infrastructure_resource_group_name" {
-  description = "Name of the platform-managed resource group created for the Managed Environment to host infrastructure resources. Changing this forces a new resource to be created."
+  description = "Name of the platform-managed resource group created for the Managed Environment to host infrastructure resources. Only valid when `workload_profiles` contains a profile. Changing this forces a new resource to be created."
   type        = string
   default     = null
   nullable    = true

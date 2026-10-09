@@ -22,8 +22,14 @@ variable "resource_names_map" {
     rg = {
       name = "rg"
     }
+    infra_rg = {
+      name = "mrg"
+    }
     law = {
       name = "law"
+    }
+    vnet = {
+      name = "vnet"
     }
     app_env = {
       name = "env"

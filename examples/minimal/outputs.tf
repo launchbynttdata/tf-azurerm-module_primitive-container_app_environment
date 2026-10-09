@@ -39,3 +39,8 @@ output "container_app_environment_name" {
   description = "The name of the Container App Environment."
   value       = module.container_app_environment.name
 }
+
+output "infrastructure_resource_group_name" {
+  description = "Name of the platform-managed resource group Azure creates for this environment."
+  value       = module.resource_names["infra_rg"][var.resource_names_strategy]
+}

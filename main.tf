@@ -25,10 +25,10 @@ resource "azurerm_container_app_environment" "environment" {
     for_each = var.workload_profiles
 
     content {
-      name                  = each.value.name
-      workload_profile_type = each.value.workload_profile_type
-      maximum_count         = each.value.maximum_count
-      minimum_count         = each.value.minimum_count
+      name                  = workload_profile.value.name
+      workload_profile_type = workload_profile.value.workload_profile_type
+      maximum_count         = workload_profile.value.maximum_count
+      minimum_count         = workload_profile.value.minimum_count
     }
   }
 
