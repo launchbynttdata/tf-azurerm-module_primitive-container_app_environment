@@ -66,4 +66,11 @@ resource "azurerm_container_app_environment" "environment" {
   mutual_tls_enabled = var.mutual_tls_enabled
   tags               = var.tags
 
+  # A subnet-injected environment provisions and tears down a managed resource
+  # group, load balancer, and subnet service association link. That exceeded
+  # the provider's 30 minute default during create.
+  timeouts {
+    create = "60m"
+    delete = "60m"
+  }
 }
