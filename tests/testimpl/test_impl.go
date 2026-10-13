@@ -3,6 +3,7 @@ package testimpl
 import (
 	"context"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
@@ -59,6 +60,44 @@ func TestComposableComplete(t *testing.T, ctx types.TestContext) {
 		require.NotNil(t, environment.Properties.InfrastructureResourceGroup)
 		assert.Equal(t, infrastructureResourceGroupName, *environment.Properties.InfrastructureResourceGroup)
 	})
+
+	t.Run("EnsureManagedIdentity", func(t *testing.T) {
+		require.NotNil(t, environment.Identity)
+		require.NotNil(t, environment.Identity.Type)
+		assert.Equal(
+			t,
+			string(armappcontainers.ManagedServiceIdentityTypeSystemAssignedUserAssigned),
+			strings.ReplaceAll(string(*environment.Identity.Type), " ", ""),
+		)
+
+		principalID := terraform.OutputContext(t, context.Background(), ctx.TerratestTerraformOptions(), "identity_principal_id")
+		tenantID := terraform.OutputContext(t, context.Background(), ctx.TerratestTerraformOptions(), "identity_tenant_id")
+		require.NotNil(t, environment.Identity.PrincipalID)
+		require.NotNil(t, environment.Identity.TenantID)
+		assert.Equal(t, *environment.Identity.PrincipalID, principalID)
+		assert.Equal(t, *environment.Identity.TenantID, tenantID)
+
+		userAssignedIdentityID := terraform.OutputContext(t, context.Background(), ctx.TerratestTerraformOptions(), "user_assigned_identity_id")
+		userAssignedPrincipalID := terraform.OutputContext(t, context.Background(), ctx.TerratestTerraformOptions(), "user_assigned_identity_principal_id")
+		assigned := userAssignedIdentityByID(environment.Identity.UserAssignedIdentities, userAssignedIdentityID)
+		require.NotNil(t, assigned, "user-assigned identity %s should be on the environment", userAssignedIdentityID)
+		require.NotNil(t, assigned.PrincipalID)
+		assert.Equal(t, *assigned.PrincipalID, userAssignedPrincipalID)
+	})
+}
+
+func userAssignedIdentityByID(identities map[string]*armappcontainers.UserAssignedIdentity, id string) *armappcontainers.UserAssignedIdentity {
+	if assigned, ok := identities[id]; ok {
+		return assigned
+	}
+
+	for key, assigned := range identities {
+		if strings.EqualFold(key, id) {
+			return assigned
+		}
+	}
+
+	return nil
 }
 
 func TestComposableReadonlyComplete(t *testing.T, ctx types.TestContext) {

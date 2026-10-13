@@ -49,3 +49,18 @@ output "static_ip_address" {
   description = "The static IP address assigned to the Container App Environment. This will be a Public IP unless internal_load_balancer_enabled is set to true, in which case an IP in the Internal Subnet will be reserved."
   value       = azurerm_container_app_environment.environment.static_ip_address
 }
+
+output "principal_id" {
+  description = "Principal ID of the system-assigned managed identity. Null when the environment has no system-assigned identity."
+  value       = local.system_assigned_principal_id != null && local.system_assigned_principal_id != "" ? local.system_assigned_principal_id : null
+}
+
+output "tenant_id" {
+  description = "Tenant ID of the system-assigned managed identity. Null when the environment has no system-assigned identity."
+  value       = local.system_assigned_tenant_id != null && local.system_assigned_tenant_id != "" ? local.system_assigned_tenant_id : null
+}
+
+output "user_assigned_identity_principal_ids" {
+  description = "Map of the caller-chosen identity_ids key to that user-assigned identity's principal ID. Empty when no user-assigned identity is configured. The identity resource IDs must belong to the same subscription as the provider."
+  value       = { for key, identity in data.azurerm_user_assigned_identity.assigned : key => identity.principal_id }
+}

@@ -97,6 +97,43 @@ variable "workload_profiles" {
   }
 }
 
+variable "identity" {
+  description = "Optional managed identity for the Container App Environment. `type` must be `SystemAssigned`, `UserAssigned`, or `SystemAssigned, UserAssigned`. `identity_ids` is a map of caller-chosen keys to user-assigned identity resource IDs. The keys must be known at plan time; the IDs may be created in the same configuration. `identity_ids` is required when `type` includes `UserAssigned` and must be empty when `type` is `SystemAssigned`. Each ID must be a user-assigned identity in the same subscription as the provider, because this module reads that identity to return its principal ID. `user_assigned_identity_principal_ids` uses the same keys."
+  type = object({
+    type         = string
+    identity_ids = optional(map(string))
+  })
+  default  = null
+  nullable = true
+
+  validation {
+    condition = var.identity == null ? true : contains([
+      "SystemAssigned",
+      "UserAssigned",
+      "SystemAssigned, UserAssigned",
+    ], var.identity.type)
+    error_message = "identity.type must be SystemAssigned, UserAssigned, or SystemAssigned, UserAssigned."
+  }
+
+  validation {
+    condition = var.identity == null ? true : (
+      contains(["UserAssigned", "SystemAssigned, UserAssigned"], var.identity.type) ? (
+        var.identity.identity_ids != null && length(var.identity.identity_ids) > 0
+      ) : true
+    )
+    error_message = "identity.identity_ids must contain at least one user-assigned identity ID when identity.type includes UserAssigned."
+  }
+
+  validation {
+    condition = var.identity == null ? true : (
+      var.identity.type == "SystemAssigned" ? (
+        var.identity.identity_ids == null ? true : length(var.identity.identity_ids) == 0
+      ) : true
+    )
+    error_message = "identity.identity_ids must be omitted when identity.type is SystemAssigned."
+  }
+}
+
 variable "mutual_tls_enabled" {
   description = "Should mutual transport layer security (mTLS) be enabled? Defaults to false."
   type        = bool

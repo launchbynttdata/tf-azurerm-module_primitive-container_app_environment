@@ -10,6 +10,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+locals {
+  # Keys are caller-chosen and known at plan time. Values are identity resource
+  # IDs and may be unknown until apply, so they cannot be for_each keys.
+  user_assigned_identities = var.identity == null ? {} : coalesce(var.identity.identity_ids, {})
+
+  system_assigned_principal_id = try(one(azurerm_container_app_environment.environment.identity).principal_id, null)
+  system_assigned_tenant_id    = try(one(azurerm_container_app_environment.environment.identity).tenant_id, null)
+}
+
+data "azurerm_user_assigned_identity" "assigned" {
+  for_each = local.user_assigned_identities
+
+  name = regex(
+    "(?i)^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft\\.ManagedIdentity/userAssignedIdentities/([^/]+)$",
+    each.value,
+  )[0]
+  resource_group_name = regex(
+    "(?i)^/subscriptions/[^/]+/resourceGroups/([^/]+)/providers/Microsoft\\.ManagedIdentity/userAssignedIdentities/[^/]+$",
+    each.value,
+  )[0]
+}
+
 resource "azurerm_container_app_environment" "environment" {
   name                                        = var.name
   resource_group_name                         = var.resource_group_name
@@ -20,6 +42,15 @@ resource "azurerm_container_app_environment" "environment" {
   internal_load_balancer_enabled              = var.internal_load_balancer_enabled
   zone_redundancy_enabled                     = var.zone_redundancy_enabled
   log_analytics_workspace_id                  = var.log_analytics_workspace_id
+
+  dynamic "identity" {
+    for_each = var.identity == null ? [] : [var.identity]
+
+    content {
+      type         = identity.value.type
+      identity_ids = identity.value.identity_ids == null ? null : values(identity.value.identity_ids)
+    }
+  }
 
   dynamic "workload_profile" {
     for_each = var.workload_profiles
@@ -35,4 +66,11 @@ resource "azurerm_container_app_environment" "environment" {
   mutual_tls_enabled = var.mutual_tls_enabled
   tags               = var.tags
 
+  # A subnet-injected environment provisions and tears down a managed resource
+  # group, load balancer, and subnet service association link. That exceeded
+  # the provider's 30 minute default during create.
+  timeouts {
+    create = "60m"
+    delete = "60m"
+  }
 }

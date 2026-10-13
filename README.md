@@ -76,6 +76,7 @@ No modules.
 | Name | Type |
 |------|------|
 | [azurerm_container_app_environment.environment](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/container_app_environment) | resource |
+| [azurerm_user_assigned_identity.assigned](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/user_assigned_identity) | data source |
 
 ## Inputs
 
@@ -91,6 +92,7 @@ No modules.
 | <a name="input_zone_redundancy_enabled"></a> [zone\_redundancy\_enabled](#input\_zone\_redundancy\_enabled) | Should the Container App Environment be created with Zone Redundancy enabled? Defaults to false. Can only be enabled if `infrastructure_subnet_id` is specified. Changing this forces a new resource to be created. | `bool` | `null` | no |
 | <a name="input_log_analytics_workspace_id"></a> [log\_analytics\_workspace\_id](#input\_log\_analytics\_workspace\_id) | The ID for the Log Analytics Workspace to link this Container Apps Managed Environment to. | `string` | `null` | no |
 | <a name="input_workload_profiles"></a> [workload\_profiles](#input\_workload\_profiles) | A list of workload profiles for the Container App Environment. `workload_profile_type` must be one of 'Consumption', 'D4', 'D8', 'D16', 'D32', 'E4', 'E8', 'E16', or 'E32'. If the type is 'Consumption', the name must also be 'Consumption'. Only one Consumption workload profile is allowed per environment. The default value (an empty list) will result in an environment that is Consumption-only. Changing this forces a new resource to be created. | <pre>list(object({<br/>    name                  = string<br/>    workload_profile_type = string<br/>    maximum_count         = optional(number)<br/>    minimum_count         = optional(number)<br/>  }))</pre> | `[]` | no |
+| <a name="input_identity"></a> [identity](#input\_identity) | Optional managed identity for the Container App Environment. `type` must be `SystemAssigned`, `UserAssigned`, or `SystemAssigned, UserAssigned`. `identity_ids` is a map of caller-chosen keys to user-assigned identity resource IDs. The keys must be known at plan time; the IDs may be created in the same configuration. `identity_ids` is required when `type` includes `UserAssigned` and must be empty when `type` is `SystemAssigned`. Each ID must be a user-assigned identity in the same subscription as the provider, because this module reads that identity to return its principal ID. `user_assigned_identity_principal_ids` uses the same keys. | <pre>object({<br/>    type         = string<br/>    identity_ids = optional(map(string))<br/>  })</pre> | `null` | no |
 | <a name="input_mutual_tls_enabled"></a> [mutual\_tls\_enabled](#input\_mutual\_tls\_enabled) | Should mutual transport layer security (mTLS) be enabled? Defaults to false. | `bool` | `false` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags to apply to all resources. | `map(string)` | `{}` | no |
 
@@ -106,4 +108,7 @@ No modules.
 | <a name="output_platform_reserved_cidr"></a> [platform\_reserved\_cidr](#output\_platform\_reserved\_cidr) | The IP range, in CIDR notation, that is reserved for environment infrastructure IP addresses. This property only has a value when infrastructure\_subnet\_id is configured and will be a range within the CIDR of the Subnet. |
 | <a name="output_platform_reserved_dns_ip_address"></a> [platform\_reserved\_dns\_ip\_address](#output\_platform\_reserved\_dns\_ip\_address) | The IP address from the IP range defined by platform\_reserved\_cidr that is reserved for the internal DNS server. This property only has a value when infrastructure\_subnet\_id is configured and will be a value within the CIDR of the Subnet. |
 | <a name="output_static_ip_address"></a> [static\_ip\_address](#output\_static\_ip\_address) | The static IP address assigned to the Container App Environment. This will be a Public IP unless internal\_load\_balancer\_enabled is set to true, in which case an IP in the Internal Subnet will be reserved. |
+| <a name="output_principal_id"></a> [principal\_id](#output\_principal\_id) | Principal ID of the system-assigned managed identity. Null when the environment has no system-assigned identity. |
+| <a name="output_tenant_id"></a> [tenant\_id](#output\_tenant\_id) | Tenant ID of the system-assigned managed identity. Null when the environment has no system-assigned identity. |
+| <a name="output_user_assigned_identity_principal_ids"></a> [user\_assigned\_identity\_principal\_ids](#output\_user\_assigned\_identity\_principal\_ids) | Map of the caller-chosen identity\_ids key to that user-assigned identity's principal ID. Empty when no user-assigned identity is configured. The identity resource IDs must belong to the same subscription as the provider. |
 <!-- END_TF_DOCS -->
