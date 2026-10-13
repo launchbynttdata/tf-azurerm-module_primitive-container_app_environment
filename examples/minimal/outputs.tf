@@ -44,3 +44,23 @@ output "infrastructure_resource_group_name" {
   description = "Name of the platform-managed resource group Azure creates for this environment."
   value       = module.resource_names["infra_rg"][var.resource_names_strategy]
 }
+
+output "identity_principal_id" {
+  description = "Principal ID of the system-assigned identity on the Container App Environment."
+  value       = module.container_app_environment.principal_id
+}
+
+output "identity_tenant_id" {
+  description = "Tenant ID of the system-assigned identity on the Container App Environment."
+  value       = module.container_app_environment.tenant_id
+}
+
+output "user_assigned_identity_id" {
+  description = "Resource ID of the user-assigned identity attached to the Container App Environment."
+  value       = module.user_assigned_identity.id
+}
+
+output "user_assigned_identity_principal_id" {
+  description = "Principal ID of the user-assigned identity attached to the Container App Environment."
+  value       = module.container_app_environment.user_assigned_identity_principal_ids[module.user_assigned_identity.id]
+}

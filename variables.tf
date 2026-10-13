@@ -97,6 +97,55 @@ variable "workload_profiles" {
   }
 }
 
+variable "identity" {
+  description = "Optional managed identity for the Container App Environment. `type` must be `SystemAssigned`, `UserAssigned`, or `SystemAssigned, UserAssigned`. `identity_ids` is required when `type` includes `UserAssigned` and must be empty when `type` is `SystemAssigned`. Each ID must be a user-assigned identity resource ID in the same subscription as the provider, because this module reads that identity to return its principal ID."
+  type = object({
+    type         = string
+    identity_ids = optional(list(string))
+  })
+  default  = null
+  nullable = true
+
+  validation {
+    condition = var.identity == null ? true : contains([
+      "SystemAssigned",
+      "UserAssigned",
+      "SystemAssigned, UserAssigned",
+    ], var.identity.type)
+    error_message = "identity.type must be SystemAssigned, UserAssigned, or SystemAssigned, UserAssigned."
+  }
+
+  validation {
+    condition = var.identity == null ? true : (
+      contains(["UserAssigned", "SystemAssigned, UserAssigned"], var.identity.type) ? (
+        var.identity.identity_ids != null && length(var.identity.identity_ids) > 0
+      ) : true
+    )
+    error_message = "identity.identity_ids must contain at least one user-assigned identity ID when identity.type includes UserAssigned."
+  }
+
+  validation {
+    condition = var.identity == null ? true : (
+      var.identity.type == "SystemAssigned" ? (
+        var.identity.identity_ids == null ? true : length(var.identity.identity_ids) == 0
+      ) : true
+    )
+    error_message = "identity.identity_ids must be omitted when identity.type is SystemAssigned."
+  }
+
+  validation {
+    condition = var.identity == null ? true : (
+      var.identity.identity_ids == null ? true : alltrue([
+        for id in var.identity.identity_ids : can(regex(
+          "(?i)^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft\\.ManagedIdentity/userAssignedIdentities/[^/]+$",
+          id
+        ))
+      ])
+    )
+    error_message = "identity.identity_ids entries must be user-assigned managed identity resource IDs."
+  }
+}
+
 variable "mutual_tls_enabled" {
   description = "Should mutual transport layer security (mTLS) be enabled? Defaults to false."
   type        = bool

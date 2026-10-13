@@ -34,6 +34,10 @@ variable "resource_names_map" {
     app_env = {
       name = "env"
     }
+    msi = {
+      name       = "msi"
+      max_length = 80
+    }
   }
 }
 

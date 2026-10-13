@@ -76,6 +76,18 @@ module "virtual_network" {
   depends_on = [module.resource_group]
 }
 
+module "user_assigned_identity" {
+  source  = "terraform.registry.launch.nttdata.com/module_primitive/user_managed_identity/azurerm"
+  version = "~> 2.0"
+
+  resource_group_name         = module.resource_group.name
+  location                    = var.resource_names_map["app_env"].region
+  user_assigned_identity_name = module.resource_names["msi"][var.resource_names_strategy]
+  tags                        = local.tags
+
+  depends_on = [module.resource_group]
+}
+
 module "container_app_environment" {
   source = "../.."
 
@@ -85,6 +97,10 @@ module "container_app_environment" {
   log_analytics_workspace_id         = module.log_analytics_workspace.id
   infrastructure_subnet_id           = module.virtual_network.subnet_name_id_map["infrastructure"]
   infrastructure_resource_group_name = module.resource_names["infra_rg"][var.resource_names_strategy]
+  identity = {
+    type         = "SystemAssigned, UserAssigned"
+    identity_ids = [module.user_assigned_identity.id]
+  }
   workload_profiles = [
     {
       name                  = "Consumption"
@@ -92,5 +108,5 @@ module "container_app_environment" {
     }
   ]
 
-  depends_on = [module.log_analytics_workspace]
+  depends_on = [module.log_analytics_workspace, module.user_assigned_identity]
 }
