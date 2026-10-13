@@ -98,8 +98,10 @@ module "container_app_environment" {
   infrastructure_subnet_id           = module.virtual_network.subnet_name_id_map["infrastructure"]
   infrastructure_resource_group_name = module.resource_names["infra_rg"][var.resource_names_strategy]
   identity = {
-    type         = "SystemAssigned, UserAssigned"
-    identity_ids = [module.user_assigned_identity.id]
+    type = "SystemAssigned, UserAssigned"
+    identity_ids = {
+      environment = module.user_assigned_identity.id
+    }
   }
   workload_profiles = [
     {

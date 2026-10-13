@@ -61,6 +61,6 @@ output "tenant_id" {
 }
 
 output "user_assigned_identity_principal_ids" {
-  description = "Map of user-assigned identity resource ID to that identity's principal ID. Empty when no user-assigned identity is configured. The identity resource IDs must belong to the same subscription as the provider."
-  value       = { for id, identity in data.azurerm_user_assigned_identity.assigned : id => identity.principal_id }
+  description = "Map of the caller-chosen identity_ids key to that user-assigned identity's principal ID. Empty when no user-assigned identity is configured. The identity resource IDs must belong to the same subscription as the provider."
+  value       = { for key, identity in data.azurerm_user_assigned_identity.assigned : key => identity.principal_id }
 }

@@ -62,5 +62,5 @@ output "user_assigned_identity_id" {
 
 output "user_assigned_identity_principal_id" {
   description = "Principal ID of the user-assigned identity attached to the Container App Environment."
-  value       = module.container_app_environment.user_assigned_identity_principal_ids[module.user_assigned_identity.id]
+  value       = module.container_app_environment.user_assigned_identity_principal_ids["environment"]
 }

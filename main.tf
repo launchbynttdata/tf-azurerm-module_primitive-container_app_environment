@@ -11,16 +11,16 @@
 // limitations under the License.
 
 locals {
-  user_assigned_identity_ids = toset(
-    var.identity == null ? [] : coalesce(var.identity.identity_ids, [])
-  )
+  # Keys are caller-chosen and known at plan time. Values are identity resource
+  # IDs and may be unknown until apply, so they cannot be for_each keys.
+  user_assigned_identities = var.identity == null ? {} : coalesce(var.identity.identity_ids, {})
 
   system_assigned_principal_id = try(one(azurerm_container_app_environment.environment.identity).principal_id, null)
   system_assigned_tenant_id    = try(one(azurerm_container_app_environment.environment.identity).tenant_id, null)
 }
 
 data "azurerm_user_assigned_identity" "assigned" {
-  for_each = local.user_assigned_identity_ids
+  for_each = local.user_assigned_identities
 
   name = regex(
     "(?i)^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft\\.ManagedIdentity/userAssignedIdentities/([^/]+)$",
@@ -48,7 +48,7 @@ resource "azurerm_container_app_environment" "environment" {
 
     content {
       type         = identity.value.type
-      identity_ids = identity.value.identity_ids
+      identity_ids = identity.value.identity_ids == null ? null : values(identity.value.identity_ids)
     }
   }
 
